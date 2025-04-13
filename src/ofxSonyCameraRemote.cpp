@@ -9,7 +9,6 @@ ofxSonyCameraRemote::ofxSonyCameraRemote()
 ofxSonyCameraRemote::~ofxSonyCameraRemote() {
     exit();
 }
-
 bool ofxSonyCameraRemote::setup() {
     // Initialize the Sony SDK
     bool result = SCRSDK::Init();
@@ -54,8 +53,8 @@ bool ofxSonyCameraRemote::enumerateDevices() {
     }
     
     // Enumerate connected cameras
-    SCRSDK::CrError err = SCRSDK::EnumCameraObjects(&mEnumCameraObjInfo);
-    if (err != SCRSDK::CrError_None) {
+    CrError err = SCRSDK::EnumCameraObjects(&mEnumCameraObjInfo);
+    if (err != CrError_None) {
         ofLogError("ofxSonyCameraRemote") << "Failed to enumerate camera devices: " << err;
         return false;
     }
@@ -69,7 +68,7 @@ bool ofxSonyCameraRemote::enumerateDevices() {
     
     // Store camera info objects
     for (int i = 0; i < count; i++) {
-        SCRSDK::ICrCameraObjectInfo* camera = mEnumCameraObjInfo->GetCameraObjectInfo(i);
+        const ICrCameraObjectInfo* camera = mEnumCameraObjInfo->GetCameraObjectInfo(i);
         mDeviceInfoList.push_back(camera);
     }
     
@@ -98,16 +97,17 @@ bool ofxSonyCameraRemote::connect(int deviceIndex) {
     }
     
     // Connect to the camera
-    SCRSDK::ICrCameraObjectInfo* camera = mDeviceInfoList[deviceIndex];
-    SCRSDK::CrError err = SCRSDK::Connect(
-        camera,                       // Camera info
+    const ICrCameraObjectInfo* camera = mDeviceInfoList[deviceIndex];
+    // SDK requires non-const pointer even though it shouldn't modify it
+    CrError err = SCRSDK::Connect(
+        const_cast<ICrCameraObjectInfo*>(camera), // Camera info (cast const away)
         mCallback.get(),              // Callback handler
         &mDeviceHandle,               // Output device handle
-        SCRSDK::CrSdkControlMode_Remote, // Remote control mode
-        SCRSDK::CrReconnecting_ON     // Auto reconnect
+        CrSdkControlMode_Remote,      // Remote control mode
+        CrReconnecting_ON     // Auto reconnect
     );
     
-    if (err != SCRSDK::CrError_None) {
+    if (err != CrError_None) {
         ofLogError("ofxSonyCameraRemote") << "Failed to connect to camera: " << err;
         return false;
     }
@@ -128,15 +128,15 @@ bool ofxSonyCameraRemote::disconnect() {
     }
     
     // Disconnect from the camera
-    SCRSDK::CrError err = SCRSDK::Disconnect(mDeviceHandle);
-    if (err != SCRSDK::CrError_None) {
+    CrError err = SCRSDK::Disconnect(mDeviceHandle);
+    if (err != CrError_None) {
         ofLogError("ofxSonyCameraRemote") << "Failed to disconnect from camera: " << err;
         return false;
     }
     
     // Release device
     err = SCRSDK::ReleaseDevice(mDeviceHandle);
-    if (err != SCRSDK::CrError_None) {
+    if (err != CrError_None) {
         ofLogError("ofxSonyCameraRemote") << "Failed to release camera: " << err;
     }
     
@@ -158,13 +158,13 @@ bool ofxSonyCameraRemote::capturePhoto() {
     }
     
     // Send shutter command
-    SCRSDK::CrError err = SCRSDK::SendCommand(
+    CrError err = SCRSDK::SendCommand(
         mDeviceHandle,                // Device handle
-        SCRSDK::CrCommandId_Release,  // Shutter command
-        SCRSDK::CrCommandParam_Down   // Press shutter
+        CrCommandId_Release,  // Shutter command
+        CrCommandParam_Down   // Press shutter
     );
     
-    if (err != SCRSDK::CrError_None) {
+    if (err != CrError_None) {
         ofLogError("ofxSonyCameraRemote") << "Failed to capture photo: " << err;
         return false;
     }
@@ -179,16 +179,15 @@ void ofxSonyCameraRemote::loadProperties() {
     }
     
     // Get all device properties
-    SCRSDK::CrDeviceProperty* properties = nullptr;
-    SCRSDK::CrInt32 numOfProperties = 0;
-    
-    SCRSDK::CrError err = SCRSDK::GetDeviceProperties(
+    CrDeviceProperty* properties = nullptr;
+    CrInt32 numOfProperties = 0;
+    CrError err = SCRSDK::GetDeviceProperties(
         mDeviceHandle,    // Device handle
         &properties,      // Output properties
         &numOfProperties  // Output count
     );
     
-    if (err != SCRSDK::CrError_None) {
+    if (err != CrError_None) {
         ofLogError("ofxSonyCameraRemote") << "Failed to get device properties: " << err;
         return;
     }
@@ -201,17 +200,16 @@ void ofxSonyCameraRemote::loadProperties() {
 }
 
 // Property getter and setter implementation
-bool ofxSonyCameraRemote::getProperty(SCRSDK::CrInt32u code, SCRSDK::CrInt64u& value) {
+bool ofxSonyCameraRemote::getProperty(CrInt32u code, CrInt64u& value) {
     if (!mConnected) {
         ofLogError("ofxSonyCameraRemote") << "Cannot get property: Not connected";
         return false;
     }
     
     // Get specific device properties
-    SCRSDK::CrDeviceProperty* properties = nullptr;
-    SCRSDK::CrInt32 numOfProperties = 0;
-    
-    SCRSDK::CrError err = SCRSDK::GetSelectDeviceProperties(
+    CrDeviceProperty* properties = nullptr;
+    CrInt32 numOfProperties = 0;
+    CrError err = SCRSDK::GetSelectDeviceProperties(
         mDeviceHandle,    // Device handle
         1,                // Number of property codes
         &code,            // Property code
@@ -219,7 +217,7 @@ bool ofxSonyCameraRemote::getProperty(SCRSDK::CrInt32u code, SCRSDK::CrInt64u& v
         &numOfProperties  // Output count
     );
     
-    if (err != SCRSDK::CrError_None || numOfProperties == 0) {
+    if (err != CrError_None || numOfProperties == 0) {
         ofLogError("ofxSonyCameraRemote") << "Failed to get property " << code << ": " << err;
         return false;
     }
@@ -228,30 +226,30 @@ bool ofxSonyCameraRemote::getProperty(SCRSDK::CrInt32u code, SCRSDK::CrInt64u& v
     value = properties[0].GetCurrentValue();
     
     // Release properties
-    SCRSDK::ReleaseDeviceProperties(mDeviceHandle, properties);
+    ReleaseDeviceProperties(mDeviceHandle, properties);
     
     return true;
 }
 
-bool ofxSonyCameraRemote::setProperty(SCRSDK::CrInt32u code, SCRSDK::CrInt64u value) {
+bool ofxSonyCameraRemote::setProperty(CrInt32u code, CrInt64u value) {
     if (!mConnected) {
         ofLogError("ofxSonyCameraRemote") << "Cannot set property: Not connected";
         return false;
     }
     
     // Create property to set
-    SCRSDK::CrDeviceProperty prop;
+    CrDeviceProperty prop;
     prop.SetCode(code);
     prop.SetCurrentValue(value);
-    prop.SetValueType(SCRSDK::CrDataType_UInt64);
+    prop.SetValueType(CrDataType_UInt64);
     
     // Set the property
-    SCRSDK::CrError err = SCRSDK::SetDeviceProperty(
+    CrError err = SCRSDK::SetDeviceProperty(
         mDeviceHandle,  // Device handle
         &prop           // Property to set
     );
     
-    if (err != SCRSDK::CrError_None) {
+    if (err != CrError_None) {
         ofLogError("ofxSonyCameraRemote") << "Failed to set property " << code << ": " << err;
         return false;
     }
@@ -264,24 +262,24 @@ bool ofxSonyCameraRemote::setIso(int isoValue) {
     // Convert ISO value to SDK format and set the property
     // This would need a proper mapping from ISO values to SDK enum values
     // For now, we just use the value directly
-    SCRSDK::CrInt64u sdkValue = isoValue;
-    return setProperty(SCRSDK::CrDeviceProperty_ISO, sdkValue);
+    CrInt64u sdkValue = isoValue;
+    return setProperty(CrDeviceProperty_IsoSensitivity, sdkValue);
 }
 
 bool ofxSonyCameraRemote::setShutterSpeed(double seconds) {
     // Convert shutter speed to SDK format and set the property
     // This would need a proper mapping from seconds to SDK enum values
     // For now, we use a placeholder value
-    SCRSDK::CrInt64u sdkValue = static_cast<SCRSDK::CrInt64u>(1.0 / seconds);
-    return setProperty(SCRSDK::CrDeviceProperty_ShutterSpeed, sdkValue);
+    CrInt64u sdkValue = static_cast<CrInt64u>(1.0 / seconds);
+    return setProperty(CrDeviceProperty_ShutterSpeed, sdkValue);
 }
 
 bool ofxSonyCameraRemote::setAperture(double fNumber) {
     // Convert aperture to SDK format and set the property
     // This would need a proper mapping from f-number to SDK enum values
     // For now, we use a placeholder value
-    SCRSDK::CrInt64u sdkValue = static_cast<SCRSDK::CrInt64u>(fNumber * 100);
-    return setProperty(SCRSDK::CrDeviceProperty_FNumber, sdkValue);
+    CrInt64u sdkValue = static_cast<CrInt64u>(fNumber * 100);
+    return setProperty(CrDeviceProperty_FNumber, sdkValue);
 }
 
 // Callback registration
@@ -291,13 +289,13 @@ void ofxSonyCameraRemote::registerConnectCallback(std::function<void()> callback
     }
 }
 
-void ofxSonyCameraRemote::registerDisconnectCallback(std::function<void(SCRSDK::CrInt32u)> callback) {
+void ofxSonyCameraRemote::registerDisconnectCallback(std::function<void(CrInt32u)> callback) {
     if (mCallback) {
         mCallback->setDisconnectCallback(callback);
     }
 }
 
-void ofxSonyCameraRemote::registerErrorCallback(std::function<void(SCRSDK::CrInt32u)> callback) {
+void ofxSonyCameraRemote::registerErrorCallback(std::function<void(CrInt32u)> callback) {
     if (mCallback) {
         mCallback->setErrorCallback(callback);
     }

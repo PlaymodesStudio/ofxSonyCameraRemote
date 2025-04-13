@@ -1,32 +1,31 @@
-# Prerequisites
-*.d
+# Ignore the built libraries and binaries from the Sony SDK
+external/
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+# Ignore OpenFrameworks example build files
+example/bin/
+example/obj/
+example/*.xcodeproj
+example/*.vcxproj*
+example/*.sln
+example/*/build/
+example/*/obj/
+example/*/bin/
+example/*.make
+example/Makefile
+example/config.make
 
-# Precompiled Headers
-*.gch
-*.pch
+# Ignore IDE specific files
+.vs/
+*.swp
+*.swo
+.DS_Store
+*~
+*.depend
+*.layout
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
+# Ignore the bin and obj directories
+obj/
+bin/
 
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
+# Ignore memory bank in git (it's just for development)
+memory-bank/

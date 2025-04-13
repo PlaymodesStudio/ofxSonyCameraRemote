@@ -1,5 +1,10 @@
 #include "ofApp.h"
 
+// Import necessary enum values
+using SCRSDK::CrDeviceProperty_IsoSensitivity;
+using SCRSDK::CrDeviceProperty_FNumber;
+using SCRSDK::CrDeviceProperty_ShutterSpeed;
+
 //--------------------------------------------------------------
 void ofApp::setup() {
     ofSetFrameRate(60);
@@ -26,8 +31,8 @@ void ofApp::setup() {
     
     // Register callbacks for camera events
     camera.registerConnectCallback([this]() { this->onCameraConnected(); });
-    camera.registerDisconnectCallback([this](SCRSDK::CrInt32u reason) { this->onCameraDisconnected(reason); });
-    camera.registerErrorCallback([this](SCRSDK::CrInt32u error) { this->onCameraError(error); });
+    camera.registerDisconnectCallback([this](CrInt32u reason) { this->onCameraDisconnected(reason); });
+    camera.registerErrorCallback([this](CrInt32u error) { this->onCameraError(error); });
     
     // Automatically try to find and connect to a camera
     if (camera.enumerateDevices()) {
@@ -53,7 +58,7 @@ void ofApp::draw() {
     y += 50;
     
     // Draw connection status
-    font.drawString("Status: " + (connected ? "Connected" : "Disconnected"), margin, y);
+    font.drawString("Status: " + std::string(connected ? "Connected" : "Disconnected"), margin, y);
     y += 20;
     
     if (connected) {
@@ -168,7 +173,7 @@ void ofApp::onCameraConnected() {
 }
 
 //--------------------------------------------------------------
-void ofApp::onCameraDisconnected(SCRSDK::CrInt32u reason) {
+void ofApp::onCameraDisconnected(CrInt32u reason) {
     connected = false;
     ofLogNotice("ofApp") << "Camera disconnected, reason code: " << reason;
     
@@ -179,26 +184,26 @@ void ofApp::onCameraDisconnected(SCRSDK::CrInt32u reason) {
 }
 
 //--------------------------------------------------------------
-void ofApp::onCameraError(SCRSDK::CrInt32u error) {
+void ofApp::onCameraError(CrInt32u error) {
     ofLogError("ofApp") << "Camera error, code: " << error;
 }
 
 //--------------------------------------------------------------
 void ofApp::updateCameraProperties() {
     // Get current property values
-    SCRSDK::CrInt64u value;
+    CrInt64u value;
     
-    if (camera.getProperty(SCRSDK::CrDeviceProperty_ISO, value)) {
+    if (camera.getProperty(CrDeviceProperty_IsoSensitivity, value)) {
         isoValue = ofToString(value); // In a real app, this would map to a human-readable ISO value
     }
     
-    if (camera.getProperty(SCRSDK::CrDeviceProperty_FNumber, value)) {
+    if (camera.getProperty(CrDeviceProperty_FNumber, value)) {
         // Convert to a more readable format (this is simplified)
         double fNumber = value / 100.0;
         apertureValue = "f/" + ofToString(fNumber, 1);
     }
     
-    if (camera.getProperty(SCRSDK::CrDeviceProperty_ShutterSpeed, value)) {
+    if (camera.getProperty(CrDeviceProperty_ShutterSpeed, value)) {
         // Convert to a more readable format (this is simplified)
         shutterSpeedValue = "1/" + ofToString(value);
     }

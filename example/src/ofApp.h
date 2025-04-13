@@ -3,6 +3,8 @@
 #include "ofMain.h"
 #include "ofxSonyCameraRemote.h"
 
+// CrInt32u is defined in the global namespace, not in SCRSDK
+
 class ofApp : public ofBaseApp {
 public:
     void setup();
@@ -40,8 +42,8 @@ public:
     
     // Camera event callbacks
     void onCameraConnected();
-    void onCameraDisconnected(SCRSDK::CrInt32u reason);
-    void onCameraError(SCRSDK::CrInt32u error);
+    void onCameraDisconnected(CrInt32u reason);
+    void onCameraError(CrInt32u error);
     
     // Helper methods
     void updateCameraProperties();

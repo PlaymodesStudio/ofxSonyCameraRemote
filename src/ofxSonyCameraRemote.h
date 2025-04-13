@@ -1,8 +1,21 @@
 #pragma once
 
 #include "ofMain.h"
-#include "../libs/CRSDK/CameraRemote_SDK.h"
+#include "../libs/CRSDK/include/CameraRemote_SDK.h"
 #include "ofxSonyCameraCallback.h"
+
+// Note: CrInt32u, CrInt64u types are defined in the global namespace in CrTypes.h
+// Only types specifically defined in the SCRSDK namespace need to be qualified
+using SCRSDK::CrDeviceHandle;
+using SCRSDK::ICrEnumCameraObjectInfo;
+using SCRSDK::ICrCameraObjectInfo;
+using SCRSDK::CrDeviceProperty;
+// Note: SDK uses different enum names than in our implementation
+using namespace SCRSDK; // Import all enum values from SCRSDK namespace
+using SCRSDK::CrDataType_UInt64;
+using SCRSDK::CrError_None;
+using SCRSDK::CrCommandId_Release;
+using SCRSDK::CrCommandParam_Down;
 #include <vector>
 #include <memory>
 
@@ -76,7 +89,7 @@ public:
      * @param value Reference to store the property value
      * @return true if the property was retrieved successfully, false otherwise
      */
-    bool getProperty(SCRSDK::CrInt32u code, SCRSDK::CrInt64u& value);
+    bool getProperty(CrInt32u code, CrInt64u& value);
     
     /**
      * @brief Set a camera property value
@@ -85,7 +98,7 @@ public:
      * @param value The value to set
      * @return true if the property was set successfully, false otherwise
      */
-    bool setProperty(SCRSDK::CrInt32u code, SCRSDK::CrInt64u value);
+    bool setProperty(CrInt32u code, CrInt64u value);
     
     /**
      * @brief Set ISO sensitivity
@@ -123,14 +136,14 @@ public:
      * 
      * @param callback The function to call when the camera disconnects
      */
-    void registerDisconnectCallback(std::function<void(SCRSDK::CrInt32u)> callback);
+    void registerDisconnectCallback(std::function<void(CrInt32u)> callback);
     
     /**
      * @brief Register a callback for camera error events
      * 
      * @param callback The function to call when a camera error occurs
      */
-    void registerErrorCallback(std::function<void(SCRSDK::CrInt32u)> callback);
+    void registerErrorCallback(std::function<void(CrInt32u)> callback);
     
     /**
      * @brief Get the number of enumerated devices
@@ -149,9 +162,9 @@ public:
     
 private:
     // SDK handles
-    SCRSDK::ICrEnumCameraObjectInfo* mEnumCameraObjInfo;
-    std::vector<SCRSDK::ICrCameraObjectInfo*> mDeviceInfoList;
-    SCRSDK::CrDeviceHandle mDeviceHandle;
+    ICrEnumCameraObjectInfo* mEnumCameraObjInfo;
+    std::vector<const ICrCameraObjectInfo*> mDeviceInfoList;
+    CrDeviceHandle mDeviceHandle;
     
     // Callback handler
     std::unique_ptr<ofxSonyCameraCallback> mCallback;

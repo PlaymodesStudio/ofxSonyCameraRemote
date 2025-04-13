@@ -29,7 +29,7 @@ common:
 	# include search paths, this will be usually parsed from the file system
 	# but if the addon or addon libraries need special search paths they can be
 	# specified here separated by spaces or one per line using +=
-	ADDON_INCLUDES = libs
+	ADDON_INCLUDES = libs/CRSDK/include
 
 	# any special flag that should be passed to the compiler when using this
 	# addon
@@ -60,12 +60,29 @@ common:
 	# a specific platform
 	# ADDON_LIBS_EXCLUDE =
 
-macos:
-	# For macOS, specify where to find the Sony SDK libraries
-	ADDON_LDFLAGS = -L../../../external/crsdk/CrAdapter -L../../../external/crsdk
+osx:
+	# Include paths
+	ADDON_INCLUDES += libs/CRSDK/include
 	
-	# Add Sony SDK libraries
-	ADDON_LDFLAGS += -lCr_Core -lCr_PTP_IP -lCr_PTP_USB -llibssh2 -llibusb-1.0
+	# Fix runtime paths - remove the duplicate addon path
+	ADDON_LDFLAGS = -Wl,-rpath,@executable_path/../../../../../libs/CRSDK/lib/CRSDK/CrAdapter
+	ADDON_LDFLAGS += -Wl,-rpath,@executable_path/../../../../../libs/CRSDK/lib
+	
+	# Clear ADDON_LIBS to make sure it's clean
+	ADDON_LIBS = 
+	
+	# Using the pattern from ofxOceanodeAstres - full paths with ../ prefix
+	# Core libraries
+	ADDON_LIBS += ../ofxSonyCameraRemote/libs/CRSDK/lib/libCr_Core.dylib
+	ADDON_LIBS += ../ofxSonyCameraRemote/libs/CRSDK/lib/libmonitor_protocol.dylib
+	ADDON_LIBS += ../ofxSonyCameraRemote/libs/CRSDK/lib/libmonitor_protocol_pf.dylib
+	
+	# Adapter libraries
+	ADDON_LIBS += ../ofxSonyCameraRemote/libs/CRSDK/lib/CRSDK/CrAdapter/libCr_PTP_IP.dylib
+	ADDON_LIBS += ../ofxSonyCameraRemote/libs/CRSDK/lib/CRSDK/CrAdapter/libCr_PTP_USB.dylib
+	ADDON_LIBS += ../ofxSonyCameraRemote/libs/CRSDK/lib/CRSDK/CrAdapter/libssh2.dylib
+	ADDON_LIBS += ../ofxSonyCameraRemote/libs/CRSDK/lib/CRSDK/CrAdapter/libusb-1.0.dylib
+	ADDON_LIBS += ../ofxSonyCameraRemote/libs/CRSDK/lib/CRSDK/CrAdapter/libusb-1.0.0.dylib
 
 msys2:
 	# Windows-specific configurations would go here

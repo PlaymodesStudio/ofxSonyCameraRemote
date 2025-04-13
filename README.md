@@ -32,8 +32,34 @@ An OpenFrameworks addon for controlling Sony cameras via the Sony Camera Remote 
    - Copy binary files from `CrSDK_vX.XX.XX_XXXXXXXX_Mac/external/crsdk/` to `ofxSonyCameraRemote/external/crsdk/`
 
 3. Add the addon to your project using the Project Generator or by adding `ofxSonyCameraRemote` to your project's addons.make file.
+## Library Path Issues
+
+The Sony Camera Remote SDK dynamic libraries contain hardcoded absolute paths that reference the original developer's system. 
+
+as ex :
+/Users/muramatsu/Projects/sony/_repository/Network-VericRxLibrary_231H/RxLib/core/build/bin/macosArm64/releaseShared/libmonitor_protocol.dylib
+
+These paths need to be fixed for the libraries to work correctly on your system.
+
+### Using the fix_dylib_paths.sh Script
+
+After installing the SDK files, you need to run the included script to fix the library paths:
+
+```bash
+cd openFrameworks/addons/ofxSonyCameraRemote
+chmod +x fix_dylib_paths.sh
+./fix_dylib_paths.sh
+```
+
+This script:
+1. Changes the install names of the main libraries to use @rpath
+2. Updates the inter-library dependencies to use relative paths
+3. Fixes all libraries in the CrAdapter folder
+
+Without running this script, you may encounter errors like "dyld: Library not loaded" when trying to use the addon, as the libraries will be looking for paths that exist only on the original developer's system.
 
 ## Usage
+
 
 ### Basic Example
 

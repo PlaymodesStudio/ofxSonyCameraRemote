@@ -35,6 +35,7 @@ public:
     std::string isoValue;
     std::string apertureValue;
     std::string shutterSpeedValue;
+    std::string sdkVersionString;
     
     // UI elements
     ofTrueTypeFont font;

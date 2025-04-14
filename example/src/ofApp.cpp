@@ -34,6 +34,10 @@ void ofApp::setup() {
     camera.registerDisconnectCallback([this](CrInt32u reason) { this->onCameraDisconnected(reason); });
     camera.registerErrorCallback([this](CrInt32u error) { this->onCameraError(error); });
     
+    // Get SDK version
+    CrInt32u sdkVersion = camera.getSDKVersion();
+    sdkVersionString = "SDK Version: " + ofToString(sdkVersion);
+    
     // Automatically try to find and connect to a camera
     if (camera.enumerateDevices()) {
         ofLogNotice("ofApp") << "Found " << camera.getDeviceCount() << " camera(s)";
@@ -56,6 +60,10 @@ void ofApp::draw() {
     // Draw title
     titleFont.drawString("Sony Camera Remote Example", margin, y + 24);
     y += 50;
+    
+    // Draw SDK version
+    font.drawString(sdkVersionString, margin, y);
+    y += 20;
     
     // Draw connection status
     font.drawString("Status: " + std::string(connected ? "Connected" : "Disconnected"), margin, y);

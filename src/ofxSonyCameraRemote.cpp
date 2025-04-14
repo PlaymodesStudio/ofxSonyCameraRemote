@@ -16,7 +16,6 @@ bool ofxSonyCameraRemote::setup() {
         ofLogError("ofxSonyCameraRemote") << "Failed to initialize Sony Camera Remote SDK";
         return false;
     }
-    
     // Create callback handler
     mCallback = std::make_unique<ofxSonyCameraCallback>();
     
@@ -309,6 +308,10 @@ std::string ofxSonyCameraRemote::getDeviceModel(int deviceIndex) const {
     if (deviceIndex < 0 || deviceIndex >= mDeviceInfoList.size()) {
         return "Unknown";
     }
-    
     return mDeviceInfoList[deviceIndex]->GetModel();
 }
+
+CrInt32u ofxSonyCameraRemote::getSDKVersion() const {
+    return SCRSDK::GetSDKVersion();
+}
+

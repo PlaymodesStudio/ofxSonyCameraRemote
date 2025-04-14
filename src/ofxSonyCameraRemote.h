@@ -160,6 +160,13 @@ public:
      */
     std::string getDeviceModel(int deviceIndex = 0) const;
     
+    /**
+     * @brief Get the Camera Remote SDK version
+     *
+     * @return The SDK version as an unsigned 32-bit integer
+     */
+    CrInt32u getSDKVersion() const;
+    
 private:
     // SDK handles
     ICrEnumCameraObjectInfo* mEnumCameraObjInfo;

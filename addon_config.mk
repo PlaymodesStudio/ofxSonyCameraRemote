@@ -65,7 +65,7 @@ osx:
 	ADDON_INCLUDES += libs/CRSDK/include
 	
 	# Fix runtime paths - remove the duplicate addon path
-	ADDON_LDFLAGS = -Wl,-rpath,@executable_path/../../../../../libs/CRSDK/lib/CRSDK/CrAdapter
+	ADDON_LDFLAGS = -Wl,-rpath,@executable_path/../../../../../libs/CRSDK/lib/CrAdapter
 	ADDON_LDFLAGS += -Wl,-rpath,@executable_path/../../../../../libs/CRSDK/lib
 	
 	# Clear ADDON_LIBS to make sure it's clean
@@ -78,11 +78,11 @@ osx:
 	ADDON_LIBS += ../ofxSonyCameraRemote/libs/CRSDK/lib/libmonitor_protocol_pf.dylib
 	
 	# Adapter libraries
-	ADDON_LIBS += ../ofxSonyCameraRemote/libs/CRSDK/lib/CRSDK/CrAdapter/libCr_PTP_IP.dylib
-	ADDON_LIBS += ../ofxSonyCameraRemote/libs/CRSDK/lib/CRSDK/CrAdapter/libCr_PTP_USB.dylib
-	ADDON_LIBS += ../ofxSonyCameraRemote/libs/CRSDK/lib/CRSDK/CrAdapter/libssh2.dylib
-	ADDON_LIBS += ../ofxSonyCameraRemote/libs/CRSDK/lib/CRSDK/CrAdapter/libusb-1.0.dylib
-	ADDON_LIBS += ../ofxSonyCameraRemote/libs/CRSDK/lib/CRSDK/CrAdapter/libusb-1.0.0.dylib
+	ADDON_LIBS += ../ofxSonyCameraRemote/libs/CRSDK/lib/CrAdapter/libCr_PTP_IP.dylib
+	ADDON_LIBS += ../ofxSonyCameraRemote/libs/CRSDK/lib/CrAdapter/libCr_PTP_USB.dylib
+	ADDON_LIBS += ../ofxSonyCameraRemote/libs/CRSDK/lib/CrAdapter/libssh2.dylib
+	ADDON_LIBS += ../ofxSonyCameraRemote/libs/CRSDK/lib/CrAdapter/libusb-1.0.dylib
+	ADDON_LIBS += ../ofxSonyCameraRemote/libs/CRSDK/lib/CrAdapter/libusb-1.0.0.dylib
 
 msys2:
 	# Windows-specific configurations would go here

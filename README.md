@@ -28,8 +28,8 @@ An OpenFrameworks addon for controlling Sony cameras via the Sony Camera Remote 
    ```
 
 2. Copy the Sony Camera Remote SDK files:
-   - Copy header files from `CrSDK_vX.XX.XX_XXXXXXXX_Mac/app/CRSDK/` to `ofxSonyCameraRemote/libs/CRSDK/`
-   - Copy binary files from `CrSDK_vX.XX.XX_XXXXXXXX_Mac/external/crsdk/` to `ofxSonyCameraRemote/external/crsdk/`
+   - Copy header files from `CrSDK_vX.XX.XX_XXXXXXXX_Mac/app/CRSDK/` to `ofxSonyCameraRemote/libs/CRSDK/include`
+   - Copy binary files from `CrSDK_vX.XX.XX_XXXXXXXX_Mac/external/crsdk/` to `ofxSonyCameraRemote/libs/CRSDK/lib` 
 
 3. Add the addon to your project using the Project Generator or by adding `ofxSonyCameraRemote` to your project's addons.make file.
 ## Library Path Issues

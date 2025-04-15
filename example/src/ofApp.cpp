@@ -38,7 +38,21 @@ void ofApp::setup() {
     CrInt32u sdkVersion = camera.getSDKVersion();
     sdkVersionString = "SDK Version: " + ofToString(sdkVersion);
     
-    // Automatically try to find and connect to a camera
+    // Debug USB devices before enumerating cameras
+    if (camera.debugUsbDevices()) {
+        ofLogNotice("ofApp") << "Found Sony devices via direct USB scanning";
+        
+        // Print USB device info for debugging
+        ofLogNotice("ofApp") << camera.getUsbDevicesInfo();
+    } else {
+        ofLogError("ofApp") << "No Sony devices found via direct USB scanning";
+        // Print USB errors
+        for (const auto& error : camera.getUsbErrors()) {
+            ofLogError("ofApp") << "USB Error: " << error;
+        }
+    }
+    
+    // Try to enumerate camera devices with Sony SDK
     if (camera.enumerateDevices()) {
         ofLogNotice("ofApp") << "Found " << camera.getDeviceCount() << " camera(s)";
         camera.connect();

@@ -19,6 +19,44 @@ using SCRSDK::CrCommandParam_Down;
 #include <vector>
 #include <memory>
 
+// Only include typedefs and constants we need from libusb
+// These match the libusb-1.0 API but don't require the header
+typedef struct libusb_context libusb_context;
+typedef struct libusb_device libusb_device;
+typedef struct libusb_device_handle libusb_device_handle;
+typedef struct libusb_device_descriptor {
+    uint8_t  bLength;
+    uint8_t  bDescriptorType;
+    uint16_t bcdUSB;
+    uint8_t  bDeviceClass;
+    uint8_t  bDeviceSubClass;
+    uint8_t  bDeviceProtocol;
+    uint8_t  bMaxPacketSize0;
+    uint16_t idVendor;
+    uint16_t idProduct;
+    uint16_t bcdDevice;
+    uint8_t  iManufacturer;
+    uint8_t  iProduct;
+    uint8_t  iSerialNumber;
+    uint8_t  bNumConfigurations;
+} libusb_device_descriptor;
+
+// Define libusb error codes
+#define LIBUSB_SUCCESS 0
+#define LIBUSB_ERROR_IO -1
+#define LIBUSB_ERROR_INVALID_PARAM -2
+#define LIBUSB_ERROR_ACCESS -3
+#define LIBUSB_ERROR_NO_DEVICE -4
+#define LIBUSB_ERROR_NOT_FOUND -5
+#define LIBUSB_ERROR_BUSY -6
+#define LIBUSB_ERROR_TIMEOUT -7
+#define LIBUSB_ERROR_OVERFLOW -8
+#define LIBUSB_ERROR_PIPE -9
+#define LIBUSB_ERROR_INTERRUPTED -10
+#define LIBUSB_ERROR_NO_MEM -11
+#define LIBUSB_ERROR_NOT_SUPPORTED -12
+#define LIBUSB_ERROR_OTHER -99
+
 /**
  * @brief Main class for interacting with Sony cameras via the Camera Remote SDK
  * 
@@ -167,6 +205,30 @@ public:
      */
     CrInt32u getSDKVersion() const;
     
+    /**
+     * @brief Debug USB devices by directly using libusb
+     *
+     * This method bypasses the Sony SDK to directly enumerate USB devices
+     * and identify any Sony cameras connected to the system.
+     *
+     * @return true if any Sony devices were found, false otherwise
+     */
+    bool debugUsbDevices();
+    
+    /**
+     * @brief Get detailed information about USB devices
+     *
+     * @return A string containing detailed USB device information
+     */
+    std::string getUsbDevicesInfo() const;
+    
+    /**
+     * @brief Get any USB debug error messages
+     *
+     * @return A vector of error message strings
+     */
+    std::vector<std::string> getUsbErrors() const;
+    
 private:
     // SDK handles
     ICrEnumCameraObjectInfo* mEnumCameraObjInfo;
@@ -181,4 +243,67 @@ private:
     
     // Helper methods for SDK interaction
     void loadProperties();
+    
+    // USB debugging data structures
+    struct UsbDeviceInfo {
+        uint16_t vendorId;
+        uint16_t productId;
+        uint8_t busNumber;
+        uint8_t deviceAddress;
+        std::string manufacturer;
+        std::string product;
+        std::string serialNumber;
+        bool isSonyCamera;
+        bool isAccessible;
+    };
+    
+    // USB device list and error messages
+    std::vector<UsbDeviceInfo> mUsbDeviceInfoList;
+    std::vector<std::string> mUsbErrorMessages;
+    
+    // libusb function pointer types
+    typedef int (*libusb_init_fn)(libusb_context**);
+    typedef void (*libusb_exit_fn)(libusb_context*);
+    typedef ssize_t (*libusb_get_device_list_fn)(libusb_context*, libusb_device***);
+    typedef void (*libusb_free_device_list_fn)(libusb_device**, int);
+    typedef int (*libusb_get_device_descriptor_fn)(libusb_device*, libusb_device_descriptor*);
+    typedef uint8_t (*libusb_get_bus_number_fn)(libusb_device*);
+    typedef uint8_t (*libusb_get_device_address_fn)(libusb_device*);
+    typedef int (*libusb_open_fn)(libusb_device*, libusb_device_handle**);
+    typedef void (*libusb_close_fn)(libusb_device_handle*);
+    typedef int (*libusb_get_string_descriptor_ascii_fn)(libusb_device_handle*, uint8_t, unsigned char*, int);
+    typedef int (*libusb_claim_interface_fn)(libusb_device_handle*, int);
+    typedef int (*libusb_release_interface_fn)(libusb_device_handle*, int);
+    typedef const char* (*libusb_error_name_fn)(int);
+    
+    // libusb function pointers
+    libusb_init_fn fn_libusb_init;
+    libusb_exit_fn fn_libusb_exit;
+    libusb_get_device_list_fn fn_libusb_get_device_list;
+    libusb_free_device_list_fn fn_libusb_free_device_list;
+    libusb_get_device_descriptor_fn fn_libusb_get_device_descriptor;
+    libusb_get_bus_number_fn fn_libusb_get_bus_number;
+    libusb_get_device_address_fn fn_libusb_get_device_address;
+    libusb_open_fn fn_libusb_open;
+    libusb_close_fn fn_libusb_close;
+    libusb_get_string_descriptor_ascii_fn fn_libusb_get_string_descriptor_ascii;
+    libusb_claim_interface_fn fn_libusb_claim_interface;
+    libusb_release_interface_fn fn_libusb_release_interface;
+    libusb_error_name_fn fn_libusb_error_name;
+    
+    // libusb context
+    libusb_context* mUsbContext;
+    
+    // Library handle
+    void* mLibUsbHandle;
+    
+    // USB helper methods
+    bool loadLibUsbFunctions();
+    int enumerateAllUsbDevices();
+    int countSonyDevices() const;
+    std::string getUsbDeviceString(libusb_device_handle* handle, uint8_t descIndex);
+    bool isSonyCamera(uint16_t vendorId, uint16_t productId) const;
+    void addUsbError(const std::string& message) const;
+    bool isAlpha7sIII(uint16_t vendorId, uint16_t productId, const std::string& productString) const;
+    const char* getLibUsbErrorName(int code) const;
 };
